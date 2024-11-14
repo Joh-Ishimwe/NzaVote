@@ -2,7 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
+import bcrypt from 'bcryptjs';
+
 import cors from "cors";
 import mongoose from "mongoose";
 import configurations from "./config/index.js";
