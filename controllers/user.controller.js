@@ -192,40 +192,81 @@ const getUsers = async (req, res) => {
 const castVote = async (req, res) => {
   try {
     const { candidateID } = req.body;
-    console.log("User:", req.user);
-    console.log("Candidate ID:", candidateID);
 
-    const user = req.user;
-
-    if (!user.isVerified) {
-      console.log("User not verified");
-      return res.status(403).json({ message: "You must complete verification before voting." });
+    // Ensure the user is verified and hasn't already voted
+    if (!req.user.isVerified) {
+      return res.status(403).json({ message: "You must complete OTP verification before voting." });
     }
 
-    if (user.hasVoted) {
-      console.log("User has already voted");
+    if (req.user.hasVoted) {
       return res.status(403).json({ message: "You have already cast your vote." });
     }
 
-    user.hasVoted = true;
-    await user.save();
+    // Mark the user as having voted
+    req.user.hasVoted = true;
+    await req.user.save();
 
+    // Update candidate votes
     const candidate = await Candidate.findById(candidateID);
     if (!candidate) {
-      console.log("Candidate not found");
       return res.status(404).json({ message: "Candidate not found." });
     }
 
     candidate.votes += 1;
     await candidate.save();
 
-    console.log(`Vote recorded for ${candidate.name}`);
-    res.status(200).json({ message: `Vote for candidate ${candidate.name} recorded successfully!` });
+    res.status(200).json({ message: `Vote recorded successfully for candidate ${candidate.name}!` });
   } catch (error) {
-    console.error("Vote error:", error);
+    console.error("Error during vote:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
 
 
-export { registerUser, verifyOtp, loginUser, castVote, addCandidate, getCandidates, getUsers };
+/**
+ * Update a candidate
+ */
+const updateCandidate = async (req, res) => {
+  try {
+    const { candidateID } = req.params;
+    const { name, party, description } = req.body;
+
+    // Find and update the candidate
+    const updatedCandidate = await Candidate.findByIdAndUpdate(
+      candidateID,
+      { name, party, description },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCandidate) {
+      return res.status(404).json({ message: "Candidate not found." });
+    }
+
+    res.status(200).json({ message: "Candidate updated successfully!", candidate: updatedCandidate });
+  } catch (error) {
+    console.error("Error updating candidate:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+/**
+ * Delete a candidate
+ */
+const deleteCandidate = async (req, res) => {
+  try {
+    const { candidateID } = req.params;
+
+    const deletedCandidate = await Candidate.findByIdAndDelete(candidateID);
+
+    if (!deletedCandidate) {
+      return res.status(404).json({ message: "Candidate not found." });
+    }
+
+    res.status(200).json({ message: "Candidate deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting candidate:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export { registerUser, verifyOtp, loginUser, castVote, addCandidate, getCandidates, getUsers, updateCandidate, deleteCandidate };
