@@ -1,7 +1,7 @@
 import Voter from "../models/user.model.js";
 import Candidate from "../models/candidate.model.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from 'bcryptjs';
 import otpGenerator from "../utils/otp.js";
 import sendEmail from "../utils/sendEmail.js";
 
