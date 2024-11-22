@@ -15,7 +15,7 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: ["http://localhost:3000", https://nzavote1.onrender.com]
+    origin: ["http://localhost:3000", https://nzavote1.onrender.com],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
 }));
